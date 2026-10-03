@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:medieval_chess_clock/src/providers/chess_clock_provider.dart';
 import 'package:medieval_chess_clock/src/theme.dart';
+import 'package:medieval_chess_clock/src/view/clock/time_controls_screen.dart';
 import 'package:medieval_chess_clock/src/view/home/clock_control_bar.dart';
 import 'package:medieval_chess_clock/src/view/home/play_clock_tile.dart';
 import 'package:medieval_chess_clock/src/widgets/subtle_checker_background.dart';
@@ -115,7 +116,6 @@ class ChessClockScreen extends ConsumerWidget {
                   hasStarted: clockState.activePlayer != ActivePlayer.none,
                   onPauseToggle: notifier.togglePause,
                   onReset: notifier.resetGame,
-                  onSettingsPressed: () {},
                 ),
 
                 Expanded(

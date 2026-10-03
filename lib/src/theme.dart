@@ -94,8 +94,8 @@ class MedievalTheme {
       textTheme: _textTheme,
 
       // AppBar Styling
-      appBarTheme: const AppBarTheme(
-        backgroundColor: neutral,
+      appBarTheme: AppBarTheme(
+        backgroundColor: tertiary.withValues(alpha: .1),
         foregroundColor: tertiary,
         elevation: 0,
         centerTitle: true,

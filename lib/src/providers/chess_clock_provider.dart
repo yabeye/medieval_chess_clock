@@ -15,6 +15,12 @@ class ChessClockState {
   final Duration initialTime;
   final int incrementSeconds;
   final bool showOpponentTime;
+  final dynamic selectedPreset;
+  final int customHours;
+  final int customMinutes;
+  final int customSeconds;
+  final int customIncrement;
+  final int lowTimeWarningSeconds;
 
   const ChessClockState({
     required this.timePlayer1,
@@ -24,9 +30,15 @@ class ChessClockState {
     this.activePlayer = ActivePlayer.none,
     this.isPaused = false,
     this.winner,
-    this.initialTime = const Duration(seconds: 45),
-    this.incrementSeconds = 2,
+    this.initialTime = const Duration(minutes: 3, seconds: 0),
+    this.incrementSeconds = 0,
     this.showOpponentTime = true,
+    this.selectedPreset,
+    this.customHours = 0,
+    this.customMinutes = 3,
+    this.customSeconds = 0,
+    this.customIncrement = 0,
+    this.lowTimeWarningSeconds = 30,
   });
 
   ChessClockState copyWith({
@@ -40,6 +52,12 @@ class ChessClockState {
     Duration? initialTime,
     int? incrementSeconds,
     bool? showOpponentTime,
+    dynamic selectedPreset,
+    int? customHours,
+    int? customMinutes,
+    int? customSeconds,
+    int? customIncrement,
+    int? lowTimeWarningSeconds,
   }) {
     return ChessClockState(
       timePlayer1: timePlayer1 ?? this.timePlayer1,
@@ -52,6 +70,13 @@ class ChessClockState {
       initialTime: initialTime ?? this.initialTime,
       incrementSeconds: incrementSeconds ?? this.incrementSeconds,
       showOpponentTime: showOpponentTime ?? this.showOpponentTime,
+      selectedPreset: selectedPreset ?? this.selectedPreset,
+      customHours: customHours ?? this.customHours,
+      customMinutes: customMinutes ?? this.customMinutes,
+      customSeconds: customSeconds ?? this.customSeconds,
+      customIncrement: customIncrement ?? this.customIncrement,
+      lowTimeWarningSeconds:
+          lowTimeWarningSeconds ?? this.lowTimeWarningSeconds,
     );
   }
 }
@@ -63,14 +88,13 @@ class ChessClockNotifier extends Notifier<ChessClockState> {
   @override
   ChessClockState build() {
     ref.onDispose(() => _timer?.cancel());
-    const defaultTime = Duration(seconds: 600);
+    const defaultTime = Duration(minutes: 3, seconds: 0);
     return const ChessClockState(
       timePlayer1: defaultTime,
       timePlayer2: defaultTime,
     );
   }
 
-  /// Handles instant 0ms touch-down switching
   void handleTouchDown(ActivePlayer player) {
     if (state.winner != null) return;
     if (state.timePlayer1 == Duration.zero ||
@@ -78,7 +102,6 @@ class ChessClockNotifier extends Notifier<ChessClockState> {
       return;
     }
 
-    // Reject out-of-turn taps
     if (state.activePlayer == ActivePlayer.player1 &&
         player != ActivePlayer.player1) {
       return;
@@ -105,7 +128,6 @@ class ChessClockNotifier extends Notifier<ChessClockState> {
         isPaused: false,
       );
     } else {
-      // First tap starts the opponent's clock
       state = state.copyWith(
         activePlayer: player == ActivePlayer.player1
             ? ActivePlayer.player2
@@ -113,13 +135,11 @@ class ChessClockNotifier extends Notifier<ChessClockState> {
         isPaused: false,
       );
     }
-
     _startTimer();
   }
 
   void _startTimer() {
     _timer?.cancel();
-    // 50ms tick interval for sub-second precision updates
     _timer = Timer.periodic(const Duration(milliseconds: 50), (_) => _tick());
   }
 
@@ -156,13 +176,47 @@ class ChessClockNotifier extends Notifier<ChessClockState> {
     state = state.copyWith(isPaused: !state.isPaused);
   }
 
+  void updateSettings({
+    required Duration initialTime,
+    required int incrementSeconds,
+    required dynamic selectedPreset,
+    required int customHours,
+    required int customMinutes,
+    required int customSeconds,
+    required int customIncrement,
+    required int lowTimeWarningSeconds,
+    required bool showOpponentTime, // NEW
+  }) {
+    state = state.copyWith(
+      initialTime: initialTime,
+      incrementSeconds: incrementSeconds,
+      timePlayer1: initialTime,
+      timePlayer2: initialTime,
+      movesPlayer1: 0,
+      movesPlayer2: 0,
+      activePlayer: ActivePlayer.none,
+      isPaused: false,
+      winner: null,
+      selectedPreset: selectedPreset,
+      customHours: customHours,
+      customMinutes: customMinutes,
+      customSeconds: customSeconds,
+      customIncrement: customIncrement,
+      lowTimeWarningSeconds: lowTimeWarningSeconds,
+      showOpponentTime: showOpponentTime, // NEW
+    );
+  }
+
   void resetGame() {
     _timer?.cancel();
-    state = ChessClockState(
+    state = state.copyWith(
       timePlayer1: state.initialTime,
       timePlayer2: state.initialTime,
-      initialTime: state.initialTime,
-      incrementSeconds: state.incrementSeconds,
+      movesPlayer1: 0,
+      movesPlayer2: 0,
+      activePlayer: ActivePlayer.none,
+      isPaused: false,
+      winner: null,
     );
   }
 }

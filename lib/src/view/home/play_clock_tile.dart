@@ -235,6 +235,10 @@ class _PlayerInfoFooter extends StatelessWidget {
       alpha: isActive ? 0.95 : 0.85,
     );
 
+    final String infoText = incrementSeconds > 0
+        ? 'MOVES: $movesCount  •  +${incrementSeconds}s INCR'
+        : 'MOVES: $movesCount';
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -271,7 +275,7 @@ class _PlayerInfoFooter extends StatelessWidget {
             ),
           ),
           child: Text(
-            'MOVES: $movesCount  •  +${incrementSeconds}s INCR',
+            infoText,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.bold,
               letterSpacing: 0.8,

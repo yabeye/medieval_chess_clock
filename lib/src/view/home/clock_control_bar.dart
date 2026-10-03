@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:medieval_chess_clock/src/theme.dart';
+import 'package:medieval_chess_clock/src/view/clock/time_controls_screen.dart';
 
 class ClockControlBar extends StatelessWidget {
   final bool isPaused;
   final bool hasStarted;
   final VoidCallback onPauseToggle;
   final VoidCallback onReset;
-  final VoidCallback onSettingsPressed;
 
   const ClockControlBar({
     super.key,
@@ -14,7 +14,6 @@ class ClockControlBar extends StatelessWidget {
     required this.hasStarted,
     required this.onPauseToggle,
     required this.onReset,
-    required this.onSettingsPressed,
   });
 
   @override
@@ -45,10 +44,23 @@ class ClockControlBar extends StatelessWidget {
             tooltip: isPaused ? 'Resume' : 'Pause',
           ),
           IconButton(
-            icon: const Icon(Icons.settings_outlined),
+            icon: const Icon(Icons.timer_outlined),
             color: MedievalTheme.tertiary,
             iconSize: 26,
-            onPressed: onSettingsPressed,
+            onPressed: () {
+              // push as stack
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  transitionDuration: const Duration(milliseconds: 600),
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      const TimeControlsScreen(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        return FadeTransition(opacity: animation, child: child);
+                      },
+                ),
+              );
+            },
             tooltip: 'Clock Settings',
           ),
         ],
