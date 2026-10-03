@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:medieval_chess_clock/src/theme.dart';
+import 'package:medieval_chess_clock/src/utils/app_assets.dart';
 import 'package:medieval_chess_clock/src/utils/screen.dart';
+import 'package:medieval_chess_clock/src/utils/sound_service.dart';
 
 class PlayerClockTile extends StatelessWidget {
   final String playerLabel;
@@ -91,7 +93,10 @@ class PlayerClockTile extends StatelessWidget {
       margin: isActive ? const EdgeInsets.only(right: 4) : null,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTapDown: (_) => onTouchDown(),
+        onTapDown: (_) {
+          SoundService().playSound(AppAssets.clockTick);
+          onTouchDown();
+        },
         child: AnimatedScale(
           scale: isActive ? 1.01 : 0.99,
           duration: const Duration(milliseconds: 300),

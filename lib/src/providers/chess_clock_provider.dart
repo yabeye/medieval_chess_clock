@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:medieval_chess_clock/src/utils/app_assets.dart';
+import 'package:medieval_chess_clock/src/utils/sound_service.dart';
 
 enum ActivePlayer { none, player1, player2 }
 
@@ -85,6 +87,9 @@ class ChessClockState {
 class ChessClockNotifier extends Notifier<ChessClockState> {
   Timer? _timer;
 
+  bool _player1WarningTriggered = false;
+  bool _player2WarningTriggered = false;
+
   @override
   ChessClockState build() {
     ref.onDispose(() => _timer?.cancel());
@@ -93,6 +98,32 @@ class ChessClockNotifier extends Notifier<ChessClockState> {
       timePlayer1: defaultTime,
       timePlayer2: defaultTime,
     );
+  }
+
+  void checkLowTimeWarnings() {
+    final warningDuration = Duration(seconds: state.lowTimeWarningSeconds);
+
+    if (!_player1WarningTriggered &&
+        state.activePlayer == ActivePlayer.player1 &&
+        state.timePlayer1 <= warningDuration &&
+        state.timePlayer1 > Duration.zero) {
+      _player1WarningTriggered = true;
+      SoundService().playSound(AppAssets.lowTime);
+    }
+
+    if (!_player2WarningTriggered &&
+        state.activePlayer == ActivePlayer.player2 &&
+        state.timePlayer2 <= warningDuration &&
+        state.timePlayer2 > Duration.zero) {
+      _player2WarningTriggered = true;
+      SoundService().playSound(AppAssets.lowTime);
+    }
+  }
+
+  // Call this reset method whenever the clock resets, starts a new game, or applies settings
+  void resetWarnings() {
+    _player1WarningTriggered = false;
+    _player2WarningTriggered = false;
   }
 
   void handleTouchDown(ActivePlayer player) {
@@ -169,6 +200,9 @@ class ChessClockNotifier extends Notifier<ChessClockState> {
         state = state.copyWith(timePlayer2: state.timePlayer2 - tickDuration);
       }
     }
+
+    // Call checkLowTimeWarnings right here on every 50ms tick!
+    checkLowTimeWarnings();
   }
 
   void togglePause() {
@@ -185,7 +219,7 @@ class ChessClockNotifier extends Notifier<ChessClockState> {
     required int customSeconds,
     required int customIncrement,
     required int lowTimeWarningSeconds,
-    required bool showOpponentTime, // NEW
+    required bool showOpponentTime,
   }) {
     state = state.copyWith(
       initialTime: initialTime,
@@ -203,8 +237,9 @@ class ChessClockNotifier extends Notifier<ChessClockState> {
       customSeconds: customSeconds,
       customIncrement: customIncrement,
       lowTimeWarningSeconds: lowTimeWarningSeconds,
-      showOpponentTime: showOpponentTime, // NEW
+      showOpponentTime: showOpponentTime,
     );
+    resetWarnings(); // ADDED: Reset sound triggers when new time controls are applied
   }
 
   void resetGame() {
@@ -218,10 +253,11 @@ class ChessClockNotifier extends Notifier<ChessClockState> {
       isPaused: false,
       winner: null,
     );
+    resetWarnings();
   }
 }
 
 final chessClockProvider =
-    NotifierProvider<ChessClockNotifier, ChessClockState>(
-      ChessClockNotifier.new,
-    );
+    NotifierProvider<ChessClockNotifier, ChessClockState>(() {
+      return ChessClockNotifier();
+    });

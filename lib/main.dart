@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:medieval_chess_clock/src/constants.dart';
 import 'package:medieval_chess_clock/src/theme.dart';
+import 'package:medieval_chess_clock/src/utils/app_assets.dart';
+import 'package:medieval_chess_clock/src/utils/sound_service.dart';
 import 'package:medieval_chess_clock/src/view/splash/app_initialization_screen.dart';
 
 Future<void> main() async {
@@ -21,6 +23,8 @@ Future<void> main() async {
 
   // Enable edge-to-edge mode for modern Android devices
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+  await SoundService().init(AppAssets.allSoundAssets);
 
   runApp(ProviderScope(child: const MedievalChessClockApp()));
 }
